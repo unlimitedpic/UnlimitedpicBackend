@@ -38,11 +38,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django_su',
-    'oauth2_provider',
+    # 'oauth2_provider',
     'graphene_django',
     'rest_framework',
     'rest_framework.authtoken',
-    'social_django',
+    # 'social_django',
     'unlimited_app',
     'unlimited_auth',
 ]
@@ -55,7 +55,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'social_django.middleware.SocialAuthExceptionMiddleware',  # <--
+    # 'social_django.middleware.SocialAuthExceptionMiddleware',  # <--
 
 ]
 
@@ -82,11 +82,11 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'unlimited_project.wsgi.application'
 
-SOCIAL_AUTH_GOOGLE_OAUTH2_KEY ='1003768419938-o9b9dkigv61kc04qko5hiu6rq1th6jhb.apps.googleusercontent.com'  #Paste CLient Key
-SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = 'NG_phv_C0YTaSlYGGEA1f5IL' #Paste Secret Key
+# SOCIAL_AUTH_GOOGLE_OAUTH2_KEY ='1003768419938-o9b9dkigv61kc04qko5hiu6rq1th6jhb.apps.googleusercontent.com'  #Paste CLient Key
+# SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = 'NG_phv_C0YTaSlYGGEA1f5IL' #Paste Secret Key
 
-SOCIAL_AUTH_FACEBOOK_KEY = '780396882391638'
-SOCIAL_AUTH_FACEBOOK_SECRET = 'fc3443efd42e2d10e6d709700a2b98d7' 
+# SOCIAL_AUTH_FACEBOOK_KEY = '780396882391638'
+# SOCIAL_AUTH_FACEBOOK_SECRET = 'fc3443efd42e2d10e6d709700a2b98d7' 
 # Database
 # https://docs.djangoproject.com/en/1.11/ref/settings/#databases
 
