@@ -1,11 +1,12 @@
 from django.conf.urls import url
-from unlimited_app.views import image_upload,\
-								category_name,\
-								sub_category_name
+from unlimited_app.views import *
 
 
 urlpatterns = [
-	url(r'^images_posting/', image_upload.as_view(), name='uploading image for admin'),
-	url(r'^category_names/', category_name, name='image category names'),
-	url(r'^sub_category_names/', sub_category_name, name='image sub category names'),
+	url(r'^main_category/', MainCategoryAPI.as_view(), name='main_category'),
+	url(r'^sub_category/', SubCategoryAPI.as_view(), name='sub_category'),
+	url(r'^file_type/', FileTypeAPI.as_view(), name='file_type'),
+	url(r'^tags/', TagAPI.as_view(), name='tags'),
+	url(r'^image_upload/', ImageUploadAPI.as_view(), name='image_upload'),
+
 ]

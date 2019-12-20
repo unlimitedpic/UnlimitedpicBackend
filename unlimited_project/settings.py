@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'graphene_django',
     'rest_framework',
     'rest_framework.authtoken',
-    # 'social_django',
+    'social_django',
     'unlimited_app',
     'unlimited_auth',
 ]
