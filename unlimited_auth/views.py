@@ -8,7 +8,7 @@ from rest_framework import status
 from django.core.mail import send_mail
 from django.db.models import Q
 from django.core.exceptions import ObjectDoesNotExist
-from unlimited_auth.models import SocialLogin
+# from unlimited_auth.models import SocialLogin
 
 
 class Login(APIView):
