@@ -6,6 +6,8 @@ from django.http import HttpResponse, JsonResponse
 from rest_framework.views import APIView
 from rest_framework import status
 from .models import *
+from unlimited_project.settings import ROOT_URL,STATIC_URL
+
 # from unlimited_app.models import Type_of_Image,\
 # 									Image_store,\
 # 									AI_and_Txt,\
@@ -23,7 +25,7 @@ class MainCategoryAPI(APIView):
 
 		for each_category in all_categories:
 			response.append({"name":each_category.name,
-							"image": str(each_category.image),
+							"image": ROOT_URL+each_category.image.url[1:],
 							"description":each_category.description,
 							"created_at":each_category.created_at,
 							"updated_at":each_category.updated_at
@@ -37,7 +39,7 @@ class SubCategoryAPI(APIView):
 
 		for each_category in all_sub_categories:
 			response.append({"name":each_category.name,
-							"image": str(each_category.image),
+							"image": ROOT_URL+ each_category.image.url[1:],
 							"description":each_category.description,
 							"created_at":each_category.created_at,
 							"updated_at":each_category.updated_at
@@ -115,6 +117,34 @@ class ImageUploadAPI(APIView):
 		AIandTxt.objects.create(image=image_obj,ai_file=ai_file,txt_file=txt_file)
 
 		return Response(status=status.HTTP_200_OK)
+
+	def get(self, request, format="json"):
+		image_tag = request.data.get('tag',None)
+		if image_tag != None:
+			tags = image_tag.split(',')
+			tags = Tag.objects.filter(name__in = tags)
+			images = ImageStore.objects.filter(image_tag__in = tags)
+			response = []
+			for image in images:
+				tags = []
+				for x in image.image_tag.all():
+					tags.append(x.name)
+				data = {
+					"sub_category_type":str(image.sub_category_type),
+					"image":ROOT_URL+image.image.url[1:],
+					"image_title":image.image_title,
+					"image_description":image.image_description,
+					"image_tag":tags,
+					"image_upload_date":image.image_upload_date,
+					"file_type":str(image.file_type)
+				}
+				response.append(data)
+			return JsonResponse(response,safe = False,status=status.HTTP_200_OK)
+
+		else:
+			return JsonResponse({"error":"no tag"},safe = False)
+
+# class GetImage(APIView):
 
 
 

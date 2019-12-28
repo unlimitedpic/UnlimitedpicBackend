@@ -43,21 +43,28 @@ from datetime import date
 
 #Amar models
 class MainCategory(models.Model):
-	image = models.ImageField(null = True, blank = True,upload_to= "Unlimited_images/images/")
+	image = models.ImageField(null = True, blank = True,upload_to= "images/")
 	name = models.CharField(max_length= 100)
 	description = models.TextField(blank = True, null = True)
 	created_at = models.DateTimeField(auto_now=True)
 	updated_at = models.DateTimeField(auto_now= True)
+
+	def image_url(self):
+		return os.path.join('',settings.MEDIA_URL+'images/', os.path.basename(str(self.image)))
 
 	def __str__(self):
 		return self.name
 
 class SubCategory(models.Model):
 	name = models.CharField(max_length= 100)
-	image = models.ImageField(null = True, blank = True,upload_to= "Unlimited_images/images/")
+	image = models.ImageField(null = True, blank = True,upload_to= "images/")
 	description = models.TextField(blank = True, null = True)
 	created_at = models.DateTimeField(auto_now=True)
 	updated_at = models.DateTimeField(auto_now= True)
+
+	def image_url(self):
+		return os.path.join('',settings.MEDIA_URL+'images/', os.path.basename(str(self.image)))
+	
 
 	def __str__(self):
 		return self.name
@@ -81,7 +88,7 @@ class Tag(models.Model):
 class ImageStore(models.Model):
 	# image_category_type = models.ForeignKey(MainCategory, on_delete=models.CASCADE)
 	sub_category_type = models.ForeignKey(SubCategory, on_delete=models.CASCADE)
-	image = models.ImageField(null=True, blank=True, upload_to="Unlimited_images/images/")
+	image = models.ImageField(null=True, blank=True, upload_to="images/")
 	image_title = models.CharField(blank=True, null=True, max_length=1000)
 	image_description = models.TextField()
 	image_tag = models.ManyToManyField(Tag)
@@ -89,14 +96,17 @@ class ImageStore(models.Model):
 	file_type = models.ForeignKey(FileType, on_delete= models.CASCADE)
 	user = models.ForeignKey(User,on_delete= models.CASCADE)
 
+	def image_url(self):
+		return os.path.join('',settings.MEDIA_URL+'images/', os.path.basename(str(self.image)))
+
 	def __str__(self):
 		return self.image_title
 
 class AIandTxt(models.Model):
 
 	image = models.ForeignKey(ImageStore, on_delete=models.CASCADE)
-	ai_file = models.FileField(upload_to = 'Unlimited_images/ai_file/',null=True)
-	txt_file = models.FileField(upload_to = 'Unlimited_images/txt_file/',null=True)
+	ai_file = models.FileField(upload_to = 'ai_file/',null=True)
+	txt_file = models.FileField(upload_to = 'txt_file/',null=True)
 
 	def __str__(self):
 		return "%s"%(self.image.image_title)
