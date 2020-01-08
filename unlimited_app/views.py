@@ -120,10 +120,20 @@ class ImageUploadAPI(APIView):
 
 	def get(self, request, format="json"):
 		image_tag = request.data.get('tag',None)
+		image_type = request.data.get('type',None)
 		if image_tag != None:
 			tags = image_tag.split(',')
 			tags = Tag.objects.filter(name__in = tags)
-			images = ImageStore.objects.filter(image_tag__in = tags)
+			if image_tag == None:
+				images = ImageStore.objects.filter(image_tag__in = tags)
+			else:
+				try:
+					image_type = FileType.objects.get(name = image_type)
+				except:
+					return JsonResponse({"error":"invalid file type"},safe = False)
+
+				images = ImageStore.objects.filter(image_tag__in = tags,file_type = image_type)
+			
 			response = []
 			for image in images:
 				tags = []
