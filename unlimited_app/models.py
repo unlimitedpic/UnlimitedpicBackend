@@ -1,7 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 from datetime import date
-
+from django.conf import settings
+import os
 
 # class Type_of_Image(models.Model):
 
@@ -102,11 +103,10 @@ class ImageStore(models.Model):
 	def __str__(self):
 		return self.image_title
 
-class AIandTxt(models.Model):
+class ImageFile(models.Model):
 
 	image = models.ForeignKey(ImageStore, on_delete=models.CASCADE)
-	ai_file = models.FileField(upload_to = 'ai_file/',null=True)
-	txt_file = models.FileField(upload_to = 'txt_file/',null=True)
+	file = models.FileField(upload_to = 'image_file/',null=True)
 
 	def __str__(self):
 		return "%s"%(self.image.image_title)

@@ -77,9 +77,8 @@ class ImageUploadAPI(APIView):
 		user = User.objects.get(id = 1)#request.user
 		filetype = request.data.get('image_type', None)
 		sub_category_type = request.data.get('sub_category_type', None)
-		list_of_images = request.FILES.get('list_of_images')
-		ai_file = request.FILES.get('ai_file')
-		txt_file = request.FILES.get('txt_file')
+		image = request.FILES.get('image')
+		image_files = request.FILES.getlist('image_files')
 		image_title = request.data.get('image_title',None)
 		image_description = request.data.get('image_description','')
 		image_tags = request.data.get('image_tags','')
@@ -106,7 +105,7 @@ class ImageUploadAPI(APIView):
 			tags_list.append(x)
 		
 		image_obj = ImageStore.objects.create(sub_category_type = sub_category,
-															image = list_of_images,
+															image = image,
 															image_title = image_title,
 															image_description = image_description,
 															file_type = file_type,
@@ -114,25 +113,60 @@ class ImageUploadAPI(APIView):
 												)
 		image_obj.image_tag.add(*tags_list)
 		image_obj.save()
-		AIandTxt.objects.create(image=image_obj,ai_file=ai_file,txt_file=txt_file)
+		for image_file in image_files:
+			ImageFile.objects.create(image=image_obj,file = image_file)
 
 		return Response(status=status.HTTP_200_OK)
 
 	def get(self, request, format="json"):
 		image_tag = request.data.get('tag',None)
 		image_type = request.data.get('type',None)
+		sort = request.GET.get('sort','new')
+		imageId = request.GET.get('imageId',None)
+		
+
+		byte = BytesIO()
+		zf = zipfile.ZipFile(byte, "w")
+		zipped_files = []
+
+		if imageId:
+			try:
+				images = ImageStore.objects.get(id = int(imageId))
+				image_files = ImageFile.objects.filtter(image=image)
+				
+				for image_file in image_files:
+					pass
+					zipped_files.append(current_file)
+    
+					data = current_file.read()
+
+					open(current_file, 'wb').write(data)
+					zf.write(current_file)
+					os.unlink(current_file)
+
+
+
+			except:
+				return JsonResponse({"error":"invalid id"}, safe = False)
+
+
+		if sort == "new":
+			sort_by = "-image_upload_date"
+		elif sort == "old":
+			sort_by = "image_upload_date"
+
 		if image_tag != None:
 			tags = image_tag.split(',')
 			tags = Tag.objects.filter(name__in = tags)
 			if image_tag == None:
-				images = ImageStore.objects.filter(image_tag__in = tags)
+				images = ImageStore.objects.filter(image_tag__in = tags).order_by(sort_by)
 			else:
 				try:
 					image_type = FileType.objects.get(name = image_type)
 				except:
 					return JsonResponse({"error":"invalid file type"},safe = False)
 
-				images = ImageStore.objects.filter(image_tag__in = tags,file_type = image_type)
+				images = ImageStore.objects.filter(image_tag__in = tags,file_type = image_type).order_by(sort_by)
 			
 			response = []
 			for image in images:
@@ -140,6 +174,7 @@ class ImageUploadAPI(APIView):
 				for x in image.image_tag.all():
 					tags.append(x.name)
 				data = {
+					"id": image.id,
 					"sub_category_type":str(image.sub_category_type),
 					"image":ROOT_URL+image.image.url[1:],
 					"image_title":image.image_title,
