@@ -219,13 +219,21 @@ class ImageDownloadAPI(APIView):
 class MyFavoriteAPI(APIView):
 	def post(self, request):
 		user = request.user
-		imageId = imageId = request.data.get('imageId',None)
+		imageId = request.data.get('imageId',None)
+		dislike = request.data.get('dislike',False)
+
 		
 
 		try:
 			image = ImageStore.objects.get(id = imageId)
 			try:
 				myFavObj = MyFavorite.objects.get(user = user)
+				if dislike == True:
+					myFavObj.images.remove(image)
+					response= {"status":"disliked"}
+					return Response(response)
+					
+
 				myFavObj.images.add(image)
 				response= {"status":"liked"}
 				return Response(response)
@@ -243,7 +251,25 @@ class MyFavoriteAPI(APIView):
 				print(e)
 				return JsonResponse({"error":"invalid id"}, safe = False)
 	
-	# def get(self, request):
-	# 	user = request.user
+	def get(self, request):
+		user = request.user
 
-	# 	MyFavObj = MyFavorite.object.get(user = user)
+		try:
+			MyFavObj = MyFavorite.objects.get(user = user)
+			print(user,"   ",MyFavObj.images.all())
+			response = []
+			for image in MyFavObj.images.all():
+				data = {
+						"id": image.id,
+						"image":ROOT_URL+image.image.url[1:],
+						"image_title":image.image_title,
+						"file_type":str(image.file_type)
+					}
+				response.append(data)
+			return Response(response)
+
+		except Exception as e:
+			print(e)
+			return JsonResponse({"error":"invalid id"}, safe = False)
+
+		
