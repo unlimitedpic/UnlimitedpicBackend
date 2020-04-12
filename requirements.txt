@@ -3,7 +3,6 @@ chardet==3.0.4
 defusedxml==0.6.0
 idna==2.7
 oauthlib==3.1.0
-pkg-resources==0.0.0
 PyJWT==1.7.1
 python-social-auth==0.3.6
 python3-openid==3.1.0

@@ -50,9 +50,18 @@ class ImageStoreAdmin(admin.ModelAdmin):
 	list_display = ('image_title','image_upload_date','file_type','sub_category_type',)
 	search_fields = ('image_title','image_upload_date','file_type','sub_category_type',)
 
+class ImageFileAdmin(admin.ModelAdmin):
+	list_display = ('image','file',)
+	search_fields = ('image','file',)
+
+class MyFavoriteAdmin(admin.ModelAdmin):
+	list_display = ('user',)
+	search_fields = ('user',)
 
 admin.site.register(MainCategory,MainCategoryAdmin)
 admin.site.register(SubCategory,SubCategoryAdmin)
 admin.site.register(FileType,FileTypeAdmin)
 admin.site.register(Tag,TagAdmin)
 admin.site.register(ImageStore,ImageStoreAdmin)
+admin.site.register(ImageFile, ImageFileAdmin)
+admin.site.register(MyFavorite,MyFavoriteAdmin)

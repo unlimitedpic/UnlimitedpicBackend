@@ -6,12 +6,14 @@ from django.http import HttpResponse, JsonResponse
 from rest_framework.views import APIView
 from rest_framework import status
 from .models import *
+
+import os
+import zipfile
+from io import StringIO, BytesIO
+
+
 from unlimited_project.settings import ROOT_URL,STATIC_URL
 
-# from unlimited_app.models import Type_of_Image,\
-# 									Image_store,\
-# 									AI_and_Txt,\
-# 									Sub_Category_Image
 import zipfile
 
 def generating_id():
@@ -122,32 +124,6 @@ class ImageUploadAPI(APIView):
 		image_tag = request.data.get('tag',None)
 		image_type = request.data.get('type',None)
 		sort = request.GET.get('sort','new')
-		imageId = request.GET.get('imageId',None)
-		
-
-		byte = BytesIO()
-		zf = zipfile.ZipFile(byte, "w")
-		zipped_files = []
-
-		if imageId:
-			try:
-				images = ImageStore.objects.get(id = int(imageId))
-				image_files = ImageFile.objects.filtter(image=image)
-				
-				for image_file in image_files:
-					pass
-					zipped_files.append(current_file)
-    
-					data = current_file.read()
-
-					open(current_file, 'wb').write(data)
-					zf.write(current_file)
-					os.unlink(current_file)
-
-
-
-			except:
-				return JsonResponse({"error":"invalid id"}, safe = False)
 
 
 		if sort == "new":
@@ -189,22 +165,85 @@ class ImageUploadAPI(APIView):
 		else:
 			return JsonResponse({"error":"no tag"},safe = False)
 
-# class GetImage(APIView):
+class ImageDownloadAPI(APIView):
+	def get(self,request):
+		imageId = request.GET.get('imageId',None)
+		
+		if imageId:
+			try:
+				image = ImageStore.objects.get(id = int(imageId))
+				image_files = ImageFile.objects.filter(image=image)
+				files_list = []
+				files_list.append(image.image.path)
+				
+				for image_file in image_files:
+					pass
+					files_list.append(image_file.file.path)
+    
+
+				zip_subdir = image.image_title
+				zip_filename = "%s.zip" % zip_subdir
+
+				# Open StringIO to grab in-memory ZIP contents
+				s = BytesIO()
+
+				# The zip compressor
+				zf = zipfile.ZipFile(s, "w")
+
+				for fpath in files_list:
+					# Calculate path for file in zip
+					fdir, fname = os.path.split(fpath)
+					zip_path = os.path.join(zip_subdir, fname)
+
+					# Add file, at correct path
+					zf.write(fpath, zip_path)
+
+				# Must close zip for all contents to be written
+				zf.close()
+
+				# Grab ZIP file from in-memory, make response with correct MIME-type
+				resp = HttpResponse(s.getvalue(), content_type = "application/x-zip-compressed")
+				# ..and correct content-disposition
+				resp['Content-Disposition'] = 'attachment; filename=%s' % zip_filename
+
+				return resp
+				# return JsonResponse(files_list,safe= False)
 
 
 
+			except Exception as e:
+				print(e)
+				return JsonResponse({"error":"invalid id"}, safe = False)
+
+
+class MyFavoriteAPI(APIView):
+	def post(self, request):
+		user = request.user
+		imageId = imageId = request.data.get('imageId',None)
 		
 
-# def category_name(request):
-# 	category_names_list = []
-# 	image_cat_obj = Type_of_Image.objects.all()
-# 	for name in image_cat_obj:
-# 		category_names_list.append(name.image_category_type)
-# 	return HttpResponse(category_names_list)
+		try:
+			image = ImageStore.objects.get(id = imageId)
+			try:
+				myFavObj = MyFavorite.objects.get(user = user)
+				myFavObj.images.add(image)
+				response= {"status":"liked"}
+				return Response(response)
 
-# def sub_category_name(request):
-# 	sub_category_names_list = []
-# 	image_cat_obj = Sub_Category_Image.objects.all()
-# 	for name in image_cat_obj:
-# 		sub_category_names_list.append(name.sub_category_type)
-# 	return HttpResponse(sub_category_names_list)
+			except Exception as e:
+				print(e)
+				try:
+					myFavObj = MyFavorite.objects.create(user = user)
+					myFavObj.images.add(image)
+					response= {"status":"liked"}
+					return Response(response)
+				except:
+					return JsonResponse({"error":"invalid user"}, safe = False)
+		except Exception as e:
+				print(e)
+				return JsonResponse({"error":"invalid id"}, safe = False)
+	
+	# def get(self, request):
+	# 	user = request.user
+
+	# 	MyFavObj = MyFavorite.object.get(user = user)
