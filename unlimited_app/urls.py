@@ -9,6 +9,7 @@ urlpatterns = [
 	url(r'^tags/', TagAPI.as_view(), name='tags'),
 	url(r'^image_upload/', ImageUploadAPI.as_view(), name='image_upload'),
 	url(r'^image_download/', ImageDownloadAPI.as_view(), name='image_download'),
+	url(r'^image_details/', ImageDetailsAPI.as_view(), name='image_details'),
 	url(r'^myfavorite/', MyFavoriteAPI.as_view(), name='my_favorite'),
 
 ]

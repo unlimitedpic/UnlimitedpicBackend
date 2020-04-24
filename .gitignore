@@ -1,0 +1,10 @@
+__pycache__/
+*.py[cod]
+.tox/
+.coverage
+.cache
+nosetests.xml
+coverage.xml
+pip-log.txt
+pip-delete-this-directory
+.vscode

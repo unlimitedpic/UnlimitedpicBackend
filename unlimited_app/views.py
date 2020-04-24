@@ -165,6 +165,36 @@ class ImageUploadAPI(APIView):
 		else:
 			return JsonResponse({"error":"no tag"},safe = False)
 
+
+class ImageDetailsAPI(APIView):
+	def get(self,request):
+		imageId = request.GET.get('imageId',None)
+
+		images = ImageStore.objects.filter(id = imageId)
+		if len(images) != 0:
+			image = images[0]
+			tags = []
+			for x in image.image_tag.all():
+				tags.append(x.name)
+			data = {
+				"id": image.id,
+				"sub_category_type":str(image.sub_category_type),
+				"image":ROOT_URL+image.image.url[1:],
+				"image_title":image.image_title,
+				"image_description":image.image_description,
+				"image_tag":tags,
+				"image_upload_date":image.image_upload_date,
+				"file_type":str(image.file_type)
+			}
+			
+			return JsonResponse(data,safe = False,status=status.HTTP_200_OK)
+
+		else:
+			return JsonResponse({"error":"invalid id"}, safe = False)
+
+
+
+
 class ImageDownloadAPI(APIView):
 	def get(self,request):
 		imageId = request.GET.get('imageId',None)
