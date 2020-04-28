@@ -121,8 +121,8 @@ class ImageUploadAPI(APIView):
 		return Response(status=status.HTTP_200_OK)
 
 	def get(self, request, format="json"):
-		image_tag = request.data.get('tag',None)
-		image_type = request.data.get('type',None)
+		image_tag = request.GET.get('tag',None)
+		image_type = request.GET.get('type',None)
 		sort = request.GET.get('sort','new')
 
 
@@ -134,15 +134,19 @@ class ImageUploadAPI(APIView):
 		if image_tag != None:
 			tags = image_tag.split(',')
 			tags = Tag.objects.filter(name__in = tags)
-			if image_tag == None:
+			if len(tags) != 0:
 				images = ImageStore.objects.filter(image_tag__in = tags).order_by(sort_by)
 			else:
 				try:
-					image_type = FileType.objects.get(name = image_type)
+					if image_type:
+						image_type = FileType.objects.get(name = image_type)
+						images = ImageStore.objects.filter(image_tag__in = tags,file_type = image_type).order_by(sort_by)
+					else:
+						return JsonResponse([{"error":"No data found"}], safe =False)
 				except:
-					return JsonResponse({"error":"invalid file type"},safe = False)
+					return JsonResponse([{"error":"invalid file type"}],safe = False)
 
-				images = ImageStore.objects.filter(image_tag__in = tags,file_type = image_type).order_by(sort_by)
+				# images = ImageStore.objects.filter(image_tag__in = tags,file_type = image_type).order_by(sort_by)
 			
 			response = []
 			for image in images:
@@ -163,7 +167,7 @@ class ImageUploadAPI(APIView):
 			return JsonResponse(response,safe = False,status=status.HTTP_200_OK)
 
 		else:
-			return JsonResponse({"error":"no tag"},safe = False)
+			return JsonResponse([{"error":"no tag"}],safe = False)
 
 
 class ImageDetailsAPI(APIView):
@@ -190,7 +194,7 @@ class ImageDetailsAPI(APIView):
 			return JsonResponse(data,safe = False,status=status.HTTP_200_OK)
 
 		else:
-			return JsonResponse({"error":"invalid id"}, safe = False)
+			return JsonResponse([{"error":"invalid id"}], safe = False)
 
 
 
