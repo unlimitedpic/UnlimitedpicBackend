@@ -58,6 +58,7 @@ class ImageStore(models.Model):
 	image_upload_date = models.DateField(default=date.today)
 	file_type = models.ForeignKey(FileType, on_delete= models.CASCADE)
 	user = models.ForeignKey(User,on_delete= models.CASCADE)
+	isActive = models.BooleanField(default = True)
 
 	def image_url(self):
 		return os.path.join('',settings.MEDIA_URL+'images/', os.path.basename(str(self.image)))
@@ -74,5 +75,9 @@ class ImageFile(models.Model):
 		return "%s"%(self.image.image_title)
 
 class MyFavorite(models.Model):
+	user = models.OneToOneField(User,on_delete= models.CASCADE)
+	images = models.ManyToManyField(ImageStore)
+
+class MyDownload(models.Model):
 	user = models.OneToOneField(User,on_delete= models.CASCADE)
 	images = models.ManyToManyField(ImageStore)

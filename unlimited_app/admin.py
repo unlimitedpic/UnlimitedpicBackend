@@ -58,6 +58,10 @@ class MyFavoriteAdmin(admin.ModelAdmin):
 	list_display = ('user',)
 	search_fields = ('user',)
 
+class MyDownloadAdmin(admin.ModelAdmin):
+	list_display = ('user',)
+	search_fields = ('user',)
+
 admin.site.register(MainCategory,MainCategoryAdmin)
 admin.site.register(SubCategory,SubCategoryAdmin)
 admin.site.register(FileType,FileTypeAdmin)
@@ -65,3 +69,4 @@ admin.site.register(Tag,TagAdmin)
 admin.site.register(ImageStore,ImageStoreAdmin)
 admin.site.register(ImageFile, ImageFileAdmin)
 admin.site.register(MyFavorite,MyFavoriteAdmin)
+admin.site.register(MyDownload,MyDownloadAdmin)

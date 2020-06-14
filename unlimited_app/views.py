@@ -74,9 +74,9 @@ class TagAPI(APIView):
 			return JsonResponse({"error":"empty parameter passed"},safe = False)
 
 
-class ImageUploadAPI(APIView):
+class ImageAPI(APIView):
 	def post(self, request, format="json"):
-		user = User.objects.get(id = 1)#request.user
+		user = request.user
 		filetype = request.data.get('image_type', None)
 		sub_category_type = request.data.get('sub_category_type', None)
 		image = request.FILES.get('image')
@@ -170,11 +170,73 @@ class ImageUploadAPI(APIView):
 			return JsonResponse([{"error":"no tag"}],safe = False)
 
 
+	def delete(self, request):
+		image_id = request.data.get('image_id', None)
+		user = request.user
+		try:
+			image = ImageStore.objects.get(id = image_id)
+			if user.is_superuser or user == image.user:
+				image.objects.delete()
+
+				return JsonResponse([{"status":"record deleted successfully"}], safe = False)
+			else:
+				return JsonResponse([{"status":"Not authorized"}], safe = False)
+
+		except:
+			return JsonResponse([{"error":"invalid id"}], safe = False)
+
+class MyDownloadAPI(APIView):
+	def get(self, request, format="json"):
+		
+		user = request.user
+
+		data = MyDownload.objects.filter(user = user)
+		images = []
+		for image in data:
+			images.append(image.image)
+			
+		response = []
+		for image in images:
+			tags = []
+			for x in image.image_tag.all():
+				tags.append(x.name)
+			data = {
+				"id": image.id,
+				"sub_category_type":str(image.sub_category_type),
+				"image":ROOT_URL+image.image.url[1:],
+				"image_title":image.image_title,
+				"image_description":image.image_description,
+				"image_tag":tags,
+				"image_upload_date":image.image_upload_date,
+				"file_type":str(image.file_type)
+			}
+			response.append(data)
+		return JsonResponse(response,safe = False,status=status.HTTP_200_OK)
+
+
+class ImageDeactivateAPI(APIView):
+	def put(self, request):
+		image_id = request.data.get('image_id', None)
+		user = request.user
+		try:
+			image = ImageStore.objects.get(id = image_id)
+			if user.is_superuser or user == image.user:
+				image.isActive = False
+				image.save()
+
+				return JsonResponse([{"status":"record deactivated successfully"}], safe = False)
+			else:
+				return JsonResponse([{"status":"Not authorized"}], safe = False)
+
+		except:
+			return JsonResponse([{"error":"invalid id"}], safe = False)
+
+
 class ImageDetailsAPI(APIView):
 	def get(self,request):
 		imageId = request.GET.get('imageId',None)
 
-		images = ImageStore.objects.filter(id = imageId)
+		images = ImageStore.objects.filter(id = imageId, isActive = True)
 		if len(images) != 0:
 			image = images[0]
 			tags = []
@@ -199,6 +261,8 @@ class ImageDetailsAPI(APIView):
 
 
 
+
+
 class ImageDownloadAPI(APIView):
 	def get(self,request):
 		imageId = request.GET.get('imageId',None)
@@ -206,6 +270,7 @@ class ImageDownloadAPI(APIView):
 		if imageId:
 			try:
 				image = ImageStore.objects.get(id = int(imageId))
+				MyDownload
 				image_files = ImageFile.objects.filter(image=image)
 				files_list = []
 				files_list.append(image.image.path)
