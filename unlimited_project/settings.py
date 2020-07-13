@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/1.11/ref/settings/
 """
 
 import os
+from datetime import timedelta
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -32,32 +33,40 @@ ALLOWED_HOSTS = ['*']
 # Application definition
 
 INSTALLED_APPS = [
+    # 'django.contrib.admin',
+    # 'django.contrib.auth',
+    # 'django.contrib.contenttypes',
+    # 'django.contrib.sessions',
+    # 'django.contrib.messages',
+    # 'django.contrib.staticfiles',
+    # 'django_su',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django_su',
     # 'oauth2_provider',
     'graphene_django',
     'rest_framework',
     'rest_framework.authtoken',
     'social_django',
+    'user',
+    'profile',
     'unlimited_app',
-    'unlimited_auth',
+    'corsheaders'
 ]
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    # 'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    # 'social_django.middleware.SocialAuthExceptionMiddleware',  # <--
-
+    'django.middleware.security.SecurityMiddleware',
 ]
 
 ROOT_URLCONF = 'unlimited_project.urls'
@@ -83,8 +92,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'unlimited_project.wsgi.application'
 
-# SOCIAL_AUTH_GOOGLE_OAUTH2_KEY ='1003768419938-o9b9dkigv61kc04qko5hiu6rq1th6jhb.apps.googleusercontent.com'  #Paste CLient Key
-# SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = 'NG_phv_C0YTaSlYGGEA1f5IL' #Paste Secret Key
+SOCIAL_AUTH_GOOGLE_OAUTH2_KEY ='1003768419938-o9b9dkigv61kc04qko5hiu6rq1th6jhb.apps.googleusercontent.com'  #Paste CLient Key
+SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = 'NG_phv_C0YTaSlYGGEA1f5IL' #Paste Secret Key
 
 # SOCIAL_AUTH_FACEBOOK_KEY = '780396882391638'
 # SOCIAL_AUTH_FACEBOOK_SECRET = 'fc3443efd42e2d10e6d709700a2b98d7' 
@@ -98,6 +107,7 @@ DATABASES = {
     }
 }
 
+AUTH_USER_MODEL = 'user.User'
 
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
@@ -133,23 +143,29 @@ USE_TZ = True
 
 
 
-AUTHENTICATION_BACKENDS = (
-    # 'social_core.backends.open_id.OpenIdAuth',  # for Google authentication
-    # 'social_core.backends.google.GoogleOpenId',  # for Google authentication
-    'social_core.backends.google.GoogleOAuth2',  # for Google authentication
-    'social_core.backends.google.GoogleOAuth',  # for Google authentication
-    # 'social_core.backends.github.GithubOAuth2',  # for Github authentication
-    'social_core.backends.facebook.FacebookOAuth2',  # for Facebook authentication
-    # 'social_core.backends.twitter.TwitterOAuth',  # for twitter authentication
-    'django.contrib.auth.backends.ModelBackend',
-    'django_su.backends.SuBackend',
-    'unlimited_auth.authentication.EmailAuthBackend'
-)
+# AUTHENTICATION_BACKENDS = (
+#     # # 'social_core.backends.open_id.OpenIdAuth',  # for Google authentication
+#     # # 'social_core.backends.google.GoogleOpenId',  # for Google authentication
+#     # 'social_core.backends.google.GoogleOAuth2',  # for Google authentication
+#     # 'social_core.backends.google.GoogleOAuth',  # for Google authentication
+#     # # 'social_core.backends.github.GithubOAuth2',  # for Github authentication
+#     # 'social_core.backends.facebook.FacebookOAuth2',  # for Facebook authentication
+#     # # 'social_core.backends.twitter.TwitterOAuth',  # for twitter authentication
+#     # 'django.contrib.auth.backends.ModelBackend',
+#     # 'django_su.backends.SuBackend',
+#     # 'unlimited_auth.authentication.EmailAuthBackend'
+#     'django.contrib.auth.backends.ModelBackend',
+#     'registration.authentication.EmailAuthBackend'
+# )
 
 REST_FRAMEWORK = {
+     'DEFAULT_PERMISSION_CLASSES': [
+         'rest_framework.permissions.IsAuthenticated',
+         'rest_framework.permissions.IsAdminUser',
+         ],
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        # 'utils.exempt.CsrfExemptSessionAuthentication',
-    )
+     'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
+     )
 }
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.11/howto/static-files/
@@ -175,3 +191,34 @@ STATIC_URL = '/staticfiles/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles/')
 MEDIA_ROOT = os.path.join(BASE_DIR, 'staticfiles/media/')
 MEDIA_URL="/media/"
+
+
+
+JWT_AUTH = {
+  'JWT_ENCODE_HANDLER':
+  'rest_framework_jwt.utils.jwt_encode_handler',
+  'JWT_DECODE_HANDLER':
+  'rest_framework_jwt.utils.jwt_decode_handler',
+  'JWT_PAYLOAD_HANDLER':
+  'rest_framework_jwt.utils.jwt_payload_handler',
+  'JWT_PAYLOAD_GET_USER_ID_HANDLER':
+  'rest_framework_jwt.utils.jwt_get_user_id_from_payload_handler',
+  'JWT_RESPONSE_PAYLOAD_HANDLER':
+  'rest_framework_jwt.utils.jwt_response_payload_handler',
+ 
+  'JWT_SECRET_KEY': 'SECRET_KEY',
+  'JWT_GET_USER_SECRET_KEY': None,
+  'JWT_PUBLIC_KEY': None,
+  'JWT_PRIVATE_KEY': None,
+  'JWT_ALGORITHM': 'HS256',
+  'JWT_VERIFY': True,
+  'JWT_VERIFY_EXPIRATION': True,
+  'JWT_LEEWAY': 0,
+  'JWT_EXPIRATION_DELTA': timedelta(days=30),
+  'JWT_AUDIENCE': None,
+  'JWT_ISSUER': None,
+  'JWT_ALLOW_REFRESH': False,
+  'JWT_REFRESH_EXPIRATION_DELTA': timedelta(days=30),
+  'JWT_AUTH_HEADER_PREFIX': 'Bearer',
+  'JWT_AUTH_COOKIE': None,
+}

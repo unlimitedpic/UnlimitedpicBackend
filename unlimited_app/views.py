@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from rest_framework.response import Response
 from django.http import HttpResponse, JsonResponse
 from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from rest_framework import status
 from .models import *
 
@@ -134,17 +135,24 @@ class ImageAPI(APIView):
 		if image_tag != None:
 			tags = image_tag.split(',')
 			tags = Tag.objects.filter(name__in = tags)
-			if len(tags) != 0:
-				images = ImageStore.objects.filter(image_tag__in = tags).order_by(sort_by)
-			else:
+			if len(tags) != 0 and image_type:
 				try:
-					if image_type:
-						image_type = FileType.objects.get(name = image_type)
-						images = ImageStore.objects.filter(image_tag__in = tags,file_type = image_type).order_by(sort_by)
-					else:
-						return JsonResponse([{"error":"No data found"}], safe =False)
+					image_type = FileType.objects.get(name = image_type)
+					images = ImageStore.objects.filter(image_tag__in = tags,file_type = image_type).order_by(sort_by)
 				except:
 					return JsonResponse([{"error":"invalid file type"}],safe = False)
+			elif len(tags) != 0:
+				images = ImageStore.objects.filter(image_tag__in = tags).order_by(sort_by)
+			
+			# else:
+			# 	try:
+			# 		if image_type:
+			# 			image_type = FileType.objects.get(name = image_type)
+			# 			images = ImageStore.objects.filter(image_tag__in = tags,file_type = image_type).order_by(sort_by)
+			# 		else:
+			# 			return JsonResponse([{"error":"No data found"}], safe =False)
+			# 	except:
+			# 		return JsonResponse([{"error":"invalid file type"}],safe = False)
 
 				# images = ImageStore.objects.filter(image_tag__in = tags,file_type = image_type).order_by(sort_by)
 			
@@ -186,14 +194,16 @@ class ImageAPI(APIView):
 			return JsonResponse([{"error":"invalid id"}], safe = False)
 
 class MyDownloadAPI(APIView):
+	permission_classes = (IsAuthenticated,)
 	def get(self, request, format="json"):
 		
 		user = request.user
 
-		data = MyDownload.objects.filter(user = user)
+		
+		data, created = MyDownload.objects.get_or_create(user = user)
 		images = []
-		for image in data:
-			images.append(image.image)
+		for image in data.images.all():
+			images.append(image)
 			
 		response = []
 		for image in images:

@@ -1,9 +1,10 @@
 from django.db import models
-from django.contrib.auth.models import User
+# from django.contrib.auth.models import User
 from datetime import date
 from django.conf import settings
 import os
 
+User = settings.AUTH_USER_MODEL
 
 class MainCategory(models.Model):
 	image = models.ImageField(null = True, blank = True,upload_to= "images/")
