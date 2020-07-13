@@ -22,6 +22,7 @@ def generating_id():
 	return image_unique_id
 
 class MainCategoryAPI(APIView):
+	permission_classes = (AllowAny,)
 	def get(self,request):
 		all_categories = [x for x in MainCategory.objects.all()]
 		response = []
@@ -36,6 +37,7 @@ class MainCategoryAPI(APIView):
 		return JsonResponse(response,safe = False,status=status.HTTP_200_OK)
 
 class SubCategoryAPI(APIView):
+	permission_classes = (AllowAny,)
 	def get(self,request):
 		all_sub_categories = [x for x in SubCategory.objects.all()]
 		response = []
@@ -50,6 +52,7 @@ class SubCategoryAPI(APIView):
 		return JsonResponse(response,safe = False,status=status.HTTP_200_OK)
 
 class FileTypeAPI(APIView):
+	permission_classes = (AllowAny,)
 	def get(self, request):
 		all_types = [x for x in FileType.objects.all()]
 
@@ -64,6 +67,7 @@ class FileTypeAPI(APIView):
 		return JsonResponse(response,safe = False,status=status.HTTP_200_OK)
 
 class TagAPI(APIView):
+	permission_classes = (AllowAny,)
 	def get(self,request):
 		tag = request.GET.get('tag', None)
 		print(tag)
@@ -76,6 +80,7 @@ class TagAPI(APIView):
 
 
 class ImageAPI(APIView):
+	permission_classes = (AllowAny,)
 	def post(self, request, format="json"):
 		user = request.user
 		filetype = request.data.get('image_type', None)
@@ -225,6 +230,7 @@ class MyDownloadAPI(APIView):
 
 
 class ImageDeactivateAPI(APIView):
+	permission_classes = (IsAuthenticated,)
 	def put(self, request):
 		image_id = request.data.get('image_id', None)
 		user = request.user
@@ -243,6 +249,7 @@ class ImageDeactivateAPI(APIView):
 
 
 class ImageDetailsAPI(APIView):
+	permission_classes = (AllowAny,)
 	def get(self,request):
 		imageId = request.GET.get('imageId',None)
 
@@ -274,6 +281,7 @@ class ImageDetailsAPI(APIView):
 
 
 class ImageDownloadAPI(APIView):
+	permission_classes = (AllowAny,)
 	def get(self,request):
 		imageId = request.GET.get('imageId',None)
 		
@@ -326,6 +334,7 @@ class ImageDownloadAPI(APIView):
 
 
 class MyFavoriteAPI(APIView):
+	permission_classes = (IsAuthenticated,)
 	def post(self, request):
 		user = request.user
 		imageId = request.data.get('imageId',None)
