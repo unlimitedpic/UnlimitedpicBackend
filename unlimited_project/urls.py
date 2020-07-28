@@ -26,8 +26,8 @@ urlpatterns = [
     # url(r'^', include(registrationUrls)),
     url(r'^su/', include('django_su.urls')),
     url(r'^api/',include('unlimited_app.urls')),
-    url(r'api/', include('user.urls')),
-    url(r'api/', include('profile.urls')),
+    url(r'^api/', include('user.urls')),
+    url(r'^api/', include('profile.urls')),
     # url(r'^api/',include('unlimited_auth.urls')),
 
 ]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

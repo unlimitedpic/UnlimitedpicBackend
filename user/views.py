@@ -8,9 +8,13 @@ Created on Thu Dec  6 14:04:16 2019
 from rest_framework import status
 from rest_framework.generics import CreateAPIView
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAuthenticated, IsAdminUser, AllowAny
 from user.serializers import UserRegistrationSerializer, UserLoginSerializer
 from rest_framework.generics import RetrieveAPIView
+from django.http import HttpResponse, JsonResponse
+from rest_framework.views import APIView
+from .models import User
+from profile.models import UserProfile
 
 
 class UserRegistrationView(CreateAPIView):
@@ -48,3 +52,40 @@ class UserLoginView(RetrieveAPIView):
         status_code = status.HTTP_200_OK
 
         return Response(response, status=status_code)
+
+class UserView(APIView):
+
+    permission_classes = (IsAuthenticated,)
+    # serializer_class = UserLoginSerializer
+    
+    def get(self,request):
+        user = request.user
+        if user.is_superuser:
+            users = User.objects.filter(is_active = True)
+            result = []
+            for user in users:
+                profile_data = {}
+                profile_data["id"] = user.id
+                profile_data["email"] = user.email
+                try:
+                    profile = UserProfile.objects.get(user = user)
+                    profile_data["first_name"] = profile.first_name
+                    profile_data["last_name"] = profile.last_name
+                    profile_data["phone_number"] = profile.phone_number
+                    profile_data["age"] = profile.age
+                    profile_data["gender"] = profile.gender
+                except:
+                    profile_data["first_name"] = ""
+                    profile_data["last_name"] = ""
+                    profile_data["phone_number"] = ""
+                    profile_data["age"] = ""
+                    profile_data["gender"] = ""
+                result.append(profile_data)
+            return JsonResponse(result,safe = False,status=status.HTTP_200_OK)
+
+        else:
+            return JsonResponse([{"status":"Not authorized"}], safe = False)
+
+
+                
+

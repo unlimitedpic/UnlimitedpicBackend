@@ -143,11 +143,11 @@ class ImageAPI(APIView):
 			if len(tags) != 0 and image_type:
 				try:
 					image_type = FileType.objects.get(name = image_type)
-					images = ImageStore.objects.filter(image_tag__in = tags,file_type = image_type).order_by(sort_by)
+					images = ImageStore.objects.filter(image_tag__in = tags,file_type = image_type,verified = True).order_by(sort_by)
 				except:
 					return JsonResponse([{"error":"invalid file type"}],safe = False)
 			elif len(tags) != 0:
-				images = ImageStore.objects.filter(image_tag__in = tags).order_by(sort_by)
+				images = ImageStore.objects.filter(image_tag__in = tags,verified = True).order_by(sort_by)
 			
 			# else:
 			# 	try:
@@ -275,20 +275,18 @@ class ImageDetailsAPI(APIView):
 		else:
 			return JsonResponse([{"error":"invalid id"}], safe = False)
 
-
-
-
-
-
 class ImageDownloadAPI(APIView):
 	permission_classes = (AllowAny,)
 	def get(self,request):
 		imageId = request.GET.get('imageId',None)
-		
+		import pdb; pdb.set_trace();
 		if imageId:
 			try:
 				image = ImageStore.objects.get(id = int(imageId))
-				MyDownload
+				if image.isPremium:
+					count = ImageStore.objects.filter(user= request.user, verified = True).count()
+					if count < 3:
+						return JsonResponse({"error":"Premium Content- contibute " + str(3-count) + " content"}, safe = False)
 				image_files = ImageFile.objects.filter(image=image)
 				files_list = []
 				files_list.append(image.image.path)
@@ -331,6 +329,8 @@ class ImageDownloadAPI(APIView):
 			except Exception as e:
 				print(e)
 				return JsonResponse({"error":"invalid id"}, safe = False)
+		else:
+			return JsonResponse({"error":"invalid id"}, safe = False)
 
 
 class MyFavoriteAPI(APIView):
@@ -391,3 +391,47 @@ class MyFavoriteAPI(APIView):
 			return JsonResponse({"error":"invalid id"}, safe = False)
 
 		
+class ImageVerifyAPI(APIView):
+	permission_classes = (IsAuthenticated,)
+
+	def get(self,request):
+		if request.user.is_superuser:
+
+			data = []
+
+			images = ImageStore.objects.filter(verified = False)
+			response = []
+			for image in images:
+				tags = []
+				for x in image.image_tag.all():
+					tags.append(x.name)
+				data = {
+					"id": image.id,
+					"sub_category_type":str(image.sub_category_type),
+					"image":ROOT_URL+image.image.url[1:],
+					"image_title":image.image_title,
+					"image_description":image.image_description,
+					"image_tag":tags,
+					"image_upload_date":image.image_upload_date,
+					"file_type":str(image.file_type)
+				}
+				response.append(data)
+			return JsonResponse(response,safe = False,status=status.HTTP_200_OK)
+		else:
+			return JsonResponse({"Status":"Unauthorized"},status=status.HTTP_401_UNAUTHORIZED)
+	
+	def put(self,request):
+		image_id = request.data.get('image_id', None)
+		user = request.user
+		if user.is_superuser:
+			try:
+				image = ImageStore.objects.get(id = image_id)
+				image.verified = True
+				image.save()
+				return JsonResponse([{"status":"image verified successfully"}], safe = False)
+				
+
+			except:
+				return JsonResponse([{"error":"invalid id"}], safe = False)
+		else:
+			return JsonResponse([{"status":"Not authorized"}], safe = False)

@@ -59,7 +59,9 @@ class ImageStore(models.Model):
 	image_upload_date = models.DateField(default=date.today)
 	file_type = models.ForeignKey(FileType, on_delete= models.CASCADE)
 	user = models.ForeignKey(User,on_delete= models.CASCADE)
+	verified = models.BooleanField(default = False)
 	isActive = models.BooleanField(default = True)
+	isPremium = models.BooleanField(default = False)
 
 	def image_url(self):
 		return os.path.join('',settings.MEDIA_URL+'images/', os.path.basename(str(self.image)))
