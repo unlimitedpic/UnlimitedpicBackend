@@ -174,7 +174,9 @@ class ImageAPI(APIView):
 					"image_description":image.image_description,
 					"image_tag":tags,
 					"image_upload_date":image.image_upload_date,
-					"file_type":str(image.file_type)
+					"file_type":str(image.file_type),
+					"isPremium":image.isPremium,
+					"download_count":image.download_count
 				}
 				response.append(data)
 			return JsonResponse(response,safe = False,status=status.HTTP_200_OK)
@@ -279,10 +281,11 @@ class ImageDownloadAPI(APIView):
 	permission_classes = (AllowAny,)
 	def get(self,request):
 		imageId = request.GET.get('imageId',None)
-		import pdb; pdb.set_trace();
 		if imageId:
 			try:
 				image = ImageStore.objects.get(id = int(imageId))
+				image.downloadCount += 1
+				image.save()
 				if image.isPremium:
 					count = ImageStore.objects.filter(user= request.user, verified = True).count()
 					if count < 3:

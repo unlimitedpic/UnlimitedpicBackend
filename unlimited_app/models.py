@@ -62,6 +62,7 @@ class ImageStore(models.Model):
 	verified = models.BooleanField(default = False)
 	isActive = models.BooleanField(default = True)
 	isPremium = models.BooleanField(default = False)
+	download_count = models.IntegerField(default=0)
 
 	def image_url(self):
 		return os.path.join('',settings.MEDIA_URL+'images/', os.path.basename(str(self.image)))
