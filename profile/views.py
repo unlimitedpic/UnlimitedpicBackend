@@ -28,6 +28,9 @@ class UserProfileView(RetrieveAPIView):
                 'status code': status_code,
                 'message': 'User profile fetched successfully',
                 'data': [{
+                    'email':user_profile.email,
+                    'user_id':user_profile.user.id,
+                    "is_admin":user_profile.user.is_superuser,
                     'first_name': user_profile.first_name,
                     'last_name': user_profile.last_name,
                     'phone_number': user_profile.phone_number,
