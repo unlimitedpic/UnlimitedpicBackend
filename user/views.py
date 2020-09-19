@@ -42,9 +42,20 @@ class UserLoginView(RetrieveAPIView):
 
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
-        serializer.is_valid(raise_exception=True)
+        isValid = serializer.is_valid(raise_exception=False)
+
+        if not isValid:
+            response = {
+            'success' : False,
+            'status code' : status.HTTP_401_UNAUTHORIZED,
+            'message': 'Invalid Credentials'
+            }
+            status_code = status.HTTP_401_UNAUTHORIZED
+            return Response(response, status=status_code)
+        user_obj = User.objects.get(email=serializer.data['email'])
         response = {
-            'success' : 'True',
+            'success' : True,
+            'isAdmin':user_obj.is_superuser,
             'status code' : status.HTTP_200_OK,
             'message': 'User logged in  successfully',
             'token' : serializer.data['token'],
