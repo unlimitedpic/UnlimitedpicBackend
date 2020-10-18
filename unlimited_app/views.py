@@ -21,6 +21,10 @@ def generating_id():
 	image_unique_id = str(uuid.uuid4().fields[-1])[:6]
 	return image_unique_id
 
+def add_user_item_history(user,item, status):
+	history = UserUploadHistory.objects.create(user = user, image = item, status = status)
+	return history
+
 class MainCategoryAPI(APIView):
 	permission_classes = (AllowAny,)
 	def get(self,request):
@@ -123,7 +127,7 @@ class ImageAPI(APIView):
 		image_obj.save()
 		for image_file in image_files:
 			ImageFile.objects.create(image=image_obj,file = image_file)
-
+		history = add_user_item_history(user,image_obj,"Image created")
 		return Response(status=status.HTTP_200_OK)
 
 	def get(self, request, format="json"):
@@ -193,6 +197,8 @@ class ImageAPI(APIView):
 			if user.is_superuser or user == image.user:
 				image.objects.delete()
 
+				history = add_user_item_history(user,None,"Image deleted")
+
 				return JsonResponse([{"status":"record deleted successfully"}], safe = False)
 			else:
 				return JsonResponse([{"status":"Not authorized"}], safe = False)
@@ -241,7 +247,7 @@ class ImageDeactivateAPI(APIView):
 			if user.is_superuser or user == image.user:
 				image.isActive = False
 				image.save()
-
+				history = add_user_item_history(user,image,"Image deacivated")
 				return JsonResponse([{"status":"record deactivated successfully"}], safe = False)
 			else:
 				return JsonResponse([{"status":"Not authorized"}], safe = False)
@@ -438,3 +444,29 @@ class ImageVerifyAPI(APIView):
 				return JsonResponse([{"error":"invalid id"}], safe = False)
 		else:
 			return JsonResponse([{"status":"Not authorized"}], safe = False)
+
+class ImageUserHistoryAPI(APIView):
+	permission_classes = (IsAuthenticated,)
+
+	def get(self,request):
+		if request.user.is_superuser:
+
+			data = []
+
+			histories = UserUploadHistory.objects.all().order_by("-created_at")
+			response = []
+			for history in histories:
+				data = {
+					"id": history.id,
+					"user_id":history.user.id,
+					"email":history.user.email,
+					"image":ROOT_URL+history.image.image.url[1:] if history.image else None,
+					"image_title":history.image.image_title if history.image else None,
+					"created_at":history.created_at,
+					"status":history.status
+	
+				}
+				response.append(data)
+			return JsonResponse(response,safe = False,status=status.HTTP_200_OK)
+		else:
+			return JsonResponse({"Status":"Unauthorized"},status=status.HTTP_401_UNAUTHORIZED)

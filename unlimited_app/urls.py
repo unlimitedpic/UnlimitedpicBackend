@@ -14,4 +14,5 @@ urlpatterns = [
 	url(r'^image_deactivate/', ImageDeactivateAPI.as_view(), name='image_deactivate'),
 	url(r'^my_downloads/', MyDownloadAPI.as_view(), name='my_download'),
 	url(r'^image_verify/', ImageVerifyAPI.as_view(), name='image_verify'),
+	url(r'^image_history/', ImageUserHistoryAPI.as_view(), name='image_history'),
 ]

@@ -85,3 +85,9 @@ class MyFavorite(models.Model):
 class MyDownload(models.Model):
 	user = models.OneToOneField(User,on_delete= models.CASCADE)
 	images = models.ManyToManyField(ImageStore)
+
+class UserUploadHistory(models.Model):
+	user = models.ForeignKey(User,on_delete= models.CASCADE)
+	image = models.ForeignKey(ImageStore,null = True,blank = True, on_delete=models.CASCADE)
+	status = models.CharField(blank=True, null=True, max_length=100)
+	created_at = models.DateTimeField(auto_now=True)

@@ -62,6 +62,10 @@ class MyDownloadAdmin(admin.ModelAdmin):
 	list_display = ('user',)
 	search_fields = ('user',)
 
+class UserUploadHistoryAdmin(admin.ModelAdmin):
+	list_display = ('user','status','created_at',)
+	search_fields = ('user','status','created_at',)
+
 admin.site.register(MainCategory,MainCategoryAdmin)
 admin.site.register(SubCategory,SubCategoryAdmin)
 admin.site.register(FileType,FileTypeAdmin)
@@ -70,3 +74,4 @@ admin.site.register(ImageStore,ImageStoreAdmin)
 admin.site.register(ImageFile, ImageFileAdmin)
 admin.site.register(MyFavorite,MyFavoriteAdmin)
 admin.site.register(MyDownload,MyDownloadAdmin)
+admin.site.register(UserUploadHistory,UserUploadHistoryAdmin)

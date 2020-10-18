@@ -38,9 +38,9 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             user=user,
             first_name=profile_data['first_name'],
             last_name=profile_data['last_name'],
-            phone_number=profile_data['phone_number'],
-            age=profile_data['age'],
-            gender=profile_data['gender']
+            phone_number=profile_data['phone_number'] if profile_data.get("phone_number") else None,
+            age=profile_data['age'] if profile_data.get("age") else None,
+            gender=profile_data['gender'] if profile_data.get("gender") else None
         )
         return user
 
